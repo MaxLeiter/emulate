@@ -84,6 +84,42 @@ describe("GitHub repos routes", () => {
     expect(res.status).toBe(404);
   });
 
+  it("returns a repo by numeric id", async () => {
+    const byName = await app.request(`${base}/repos/octocat/hello-world`, {
+      method: "GET",
+      headers: authHeaders(),
+    });
+    const named = (await byName.json()) as { id: number };
+
+    const res = await app.request(`${base}/repositories/${named.id}`, {
+      method: "GET",
+      headers: authHeaders(),
+    });
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { id: number; full_name: string };
+    expect(body.id).toBe(named.id);
+    expect(body.full_name).toBe("octocat/hello-world");
+  });
+
+  it("returns 404 for an unknown repository id", async () => {
+    const res = await app.request(`${base}/repositories/999999`, {
+      method: "GET",
+      headers: authHeaders(),
+    });
+
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 404 for a non-numeric repository id", async () => {
+    const res = await app.request(`${base}/repositories/not-a-number`, {
+      method: "GET",
+      headers: authHeaders(),
+    });
+
+    expect(res.status).toBe(404);
+  });
+
   it("lists repos for a user", async () => {
     const res = await app.request(`${base}/users/octocat/repos`, {
       method: "GET",

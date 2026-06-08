@@ -210,6 +210,9 @@ curl http://localhost:4001/user/emails -H "Authorization: Bearer $TOKEN"
 # Get repo
 curl http://localhost:4001/repos/octocat/hello-world
 
+# Get repo by id
+curl http://localhost:4001/repositories/1
+
 # Create user repo
 curl -X POST http://localhost:4001/user/repos \
   -H "Authorization: Bearer $TOKEN" \
