@@ -133,3 +133,9 @@ Every endpoint below is fully stateful. Creates, updates, and deletes persist in
 - `GET /emojis` - emoji URLs
 - `GET /zen` - random zen phrase
 - `GET /versions` - API versions
+
+## State Introspection
+
+- `GET /_emulate/github/state` - recorded installation access token mints (token value, installation id, app id, permissions, repository ids, timestamps)
+
+A test assertion aid provided by the emulator, not part of GitHub's API.

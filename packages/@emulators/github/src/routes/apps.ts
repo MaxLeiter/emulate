@@ -143,6 +143,16 @@ export function appsRoutes({ app, store, baseUrl, tokenMap }: RouteContext): voi
       });
     }
 
+    gh.installationTokens.insert({
+      token,
+      installation_id: inst.installation_id,
+      app_id: inst.app_id,
+      permissions: requestedPermissions,
+      repository_selection: inst.repository_selection,
+      repository_ids: requestedRepoIds,
+      expires_at: expiresAt,
+    });
+
     const repos = requestedRepoIds
       .map((id) => gh.repos.get(id))
       .filter(Boolean)

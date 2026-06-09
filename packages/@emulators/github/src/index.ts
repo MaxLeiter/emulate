@@ -23,6 +23,7 @@ import { rateLimitRoutes } from "./routes/rate-limit.js";
 import { metaRoutes } from "./routes/meta.js";
 import { oauthRoutes } from "./routes/oauth.js";
 import { appsRoutes } from "./routes/apps.js";
+import { introspectionRoutes } from "./routes/introspection.js";
 
 export { getGitHubStore, type GitHubStore } from "./store.js";
 export * from "./entities.js";
@@ -493,6 +494,7 @@ export const githubPlugin: ServicePlugin = {
     metaRoutes(ctx);
     oauthRoutes(ctx);
     appsRoutes(ctx);
+    introspectionRoutes(ctx);
   },
   seed(store: Store, baseUrl: string): void {
     seedDefaults(store, baseUrl);

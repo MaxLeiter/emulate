@@ -511,6 +511,16 @@ curl http://localhost:4001/octocat
 curl http://localhost:4001/zen
 ```
 
+## State Introspection
+
+A test assertion aid provided by the emulator, not part of GitHub's API.
+
+```bash
+# Recorded installation access token mints (token value, installation id,
+# app id, permissions, repository ids, timestamps)
+curl http://localhost:4001/_emulate/github/state
+```
+
 ## Common Patterns
 
 ### Create Repo, Issue, and PR

@@ -435,6 +435,10 @@ JWT authentication: sign a JWT with `{ iss: "<app_id>" }` using the app's privat
 - All webhook payloads (including repo and org hooks) include an `installation` field with `{ id, node_id }`.
 - If the app has a `webhook_url`, the emulator delivers the event there with the `installation` field and (if configured) an `X-Hub-Signature-256` header signed with `webhook_secret`.
 
+### GitHub State Introspection
+
+Test harnesses sometimes need to assert what a client actually did against the emulator, for example that it minted an installation access token scoped to a specific repository. `GET /_emulate/github/state` returns recorded installation access token mints (token value, installation id, app id, permissions, repository ids, expiry and creation timestamps). The endpoint is a test assertion aid provided by the emulator, not part of GitHub's API.
+
 ### Slack OAuth Apps
 
 ```yaml

@@ -173,6 +173,10 @@ github:
           repository_selection: all
 ```
 
+## State Introspection
+
+`GET /_emulate/github/state` returns recorded installation access token mints (token value, installation id, app id, permissions, repository ids, timestamps). A test assertion aid provided by the emulator, not part of GitHub's API.
+
 ## Links
 
 - [Full documentation](https://emulate.dev/github)

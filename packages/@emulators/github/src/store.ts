@@ -34,6 +34,7 @@ import type {
   GitHubOAuthApp,
   GitHubApp,
   GitHubAppInstallation,
+  GitHubInstallationToken,
   GitHubOAuthGrant,
 } from "./entities.js";
 
@@ -72,6 +73,7 @@ export interface GitHubStore {
   oauthApps: Collection<GitHubOAuthApp>;
   apps: Collection<GitHubApp>;
   appInstallations: Collection<GitHubAppInstallation>;
+  installationTokens: Collection<GitHubInstallationToken>;
   oauthGrants: Collection<GitHubOAuthGrant>;
 }
 
@@ -113,6 +115,10 @@ export function getGitHubStore(store: Store): GitHubStore {
     appInstallations: store.collection<GitHubAppInstallation>("github.app_installations", [
       "app_id",
       "installation_id",
+    ]),
+    installationTokens: store.collection<GitHubInstallationToken>("github.installation_tokens", [
+      "installation_id",
+      "token",
     ]),
     oauthGrants: store.collection<GitHubOAuthGrant>("github.oauth_grants", ["user_id", "client_id"]),
   };
