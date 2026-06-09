@@ -1,6 +1,29 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { createPrivateKey, generateKeyPairSync } from "crypto";
+import { SignJWT } from "jose";
 import { Hono } from "../http.js";
 import { authMiddleware, requireAuth, requireAppAuth, type TokenMap, type AppEnv } from "../middleware/auth.js";
+
+async function signAppJwt(appId: number, privateKeyPem: string): Promise<string> {
+  return new SignJWT({})
+    .setProtectedHeader({ alg: "RS256" })
+    .setIssuer(String(appId))
+    .setIssuedAt()
+    .setExpirationTime("9m")
+    .sign(createPrivateKey(privateKeyPem));
+}
+
+function appAuthTestApp(privateKeyPem: string, tokenMap: TokenMap) {
+  const app = new Hono<AppEnv>();
+  app.use(
+    "*",
+    authMiddleware(tokenMap, (appId) =>
+      appId === 42 ? { privateKey: privateKeyPem, slug: "my-app", name: "My App" } : null,
+    ),
+  );
+  app.get("/test", (c) => c.json({ app: c.get("authApp") ?? null }));
+  return app;
+}
 
 describe("authMiddleware", () => {
   let tokenMap: TokenMap;
@@ -54,6 +77,50 @@ describe("authMiddleware", () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { user: unknown };
     expect(body.user).toBeNull();
+  });
+
+  it("sets authApp for a valid app JWT signed with a PKCS#8 key", async () => {
+    const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const pem = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+
+    const app = appAuthTestApp(pem, tokenMap);
+    const res = await app.request("/test", {
+      headers: { Authorization: `Bearer ${await signAppJwt(42, pem)}` },
+    });
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { app: { appId: number; slug: string; name: string } };
+    expect(body.app).toEqual({ appId: 42, slug: "my-app", name: "My App" });
+  });
+
+  it("sets authApp for a valid app JWT signed with a PKCS#1 key", async () => {
+    const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const pem = privateKey.export({ type: "pkcs1", format: "pem" }).toString();
+
+    const app = appAuthTestApp(pem, tokenMap);
+    const res = await app.request("/test", {
+      headers: { Authorization: `Bearer ${await signAppJwt(42, pem)}` },
+    });
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { app: { appId: number } };
+    expect(body.app?.appId).toBe(42);
+  });
+
+  it("does not set authApp for a JWT signed with a different key", async () => {
+    const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const pem = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    const { privateKey: otherKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const otherPem = otherKey.export({ type: "pkcs8", format: "pem" }).toString();
+
+    const app = appAuthTestApp(pem, tokenMap);
+    const res = await app.request("/test", {
+      headers: { Authorization: `Bearer ${await signAppJwt(42, otherPem)}` },
+    });
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { app: unknown };
+    expect(body.app).toBeNull();
   });
 });
 
